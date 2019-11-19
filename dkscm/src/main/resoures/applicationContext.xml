@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xmlns:tx="http://www.springframework.org/schema/tx"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans
+							http://www.springframework.org/schema/beans/spring-beans.xsd
+							http://www.springframework.org/schema/context
+							http://www.springframework.org/schema/context/spring-context.xsd
+							http://www.springframework.org/schema/tx
+							http://www.springframework.org/schema/tx/spring-tx.xsd">
+	<!-- 设定所使用的properties文件路径 [BEGIN] -->
+	<context:property-placeholder location="classpath*:/props/jdbc.properties"/>
+	<!-- 设定所使用的properties文件路径 [END] -->
+	
+	<!-- 配置Spring注解扫描机制的基础包位置 [BEGIN] -->
+	<context:component-scan base-package="cn.ekgc.dkscm">
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+		<context:exclude-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice"/>
+	</context:component-scan>
+	<!-- 配置Spring注解扫描机制的基础包位置 [END] -->
+	
+	<!-- Spring结合Mybatis [BEGIN] -->
+	<!-- 借助于数据库连接池，使用JDBC的机制完成数据源的创建 [BEGIN] -->
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+		<!-- 在创建该对象的时候，就需要进行相应属性的依赖注入，那么首先注入的就是JDBC的四个基本信息 -->
+		<property name="driverClassName" value="${jdbc.driverClass}"/>
+		<property name="url" value="${jdbc.url}"/>
+		<property name="username" value="${jdbc.username}"/>
+		<property name="password" value="${jdbc.password}"/>
+		
+		<!-- 为了提高数据库连接池的工作效率，可以明确对于数据库连接池在创建连接对象的时候，进行设定 -->
+		<property name="minIdle" value="${druid.minIdle}"/>
+		<property name="maxActive" value="${druid.maxActive}"/>
+		<property name="initialSize" value="${druid.initialSize}"/>
+		<property name="minEvictableIdleTimeMillis" value="${druid.minEvictableIdleTimeMillis}"/>
+		<property name="maxEvictableIdleTimeMillis" value="${druid.maxEvictableIdleTimeMillis}"/>
+	</bean>
+	<!-- 借助于数据库连接池，使用JDBC的机制完成数据源的创建 [END] -->
+	
+	<!-- 使用Spring创建Mybatis的SqlSessionFactory [BEGIN] -->
+	<bean id="sqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<!-- 依赖注入所使用的DataSource信息 -->
+		<property name="dataSource" ref="dataSource"/>
+		<!-- 设定所有的Mybatis的映射文件位置 -->
+		<property name="mapperLocations" value="classpath*:/mapper/*.mapper.xml"/>
+		<property name="typeAliasesPackage" value="cn.ekgc.dkscm.pojo.entity"/>
+	</bean>
+	<!-- 使用Spring创建Mybatis的SqlSessionFactory [END] -->
+	
+	<!-- 配置让Spring自行去扫描加载数据持久层接口 [BEGIN] -->
+	<bean id="mapperScanner" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<!-- 依赖注入SqlSessionFactory信息 -->
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactoryBean"/>
+		<!-- 设定接口所在的包位置 -->
+		<property name="basePackage" value="cn.ekgc.dkscm.dao"/>
+	</bean>
+	<!-- 配置让Spring自行去扫描加载数据持久层接口 [END] -->
+	<!-- Spring结合Mybatis [END] -->
+	
+	<!-- 配置事务处理机制 [BEGIN] -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+	<tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true"/>
+	<!-- 配置事务处理机制 [END] -->
+</beans>

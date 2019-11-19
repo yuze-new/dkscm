@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+			xmlns="http://xmlns.jcp.org/xml/ns/javaee" 
+			xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee 
+								http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd" 
+			id="WebApp_ID" version="3.1">
+	<!-- 配置Spring核心配置文件位置 [BEGIN] -->
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>
+			classpath*:/applicationContext.xml
+			classpath*:/applicationContext-config.xml
+		</param-value>
+	</context-param>
+	<!-- 配置Spring核心配置文件位置 [END] -->
+	
+	<!-- 配置监听器ContextLoader的监听器，用于整合Web和Spring两个容器 [BEGIN] -->
+	<listener>
+		<listener-class>
+			org.springframework.web.context.ContextLoaderListener
+		</listener-class>
+	</listener>
+	<!-- 配置监听器ContextLoader的监听器，用于整合Web和Spring两个容器 [END] -->
+	<listener>
+		<listener-class>
+			org.springframework.web.context.request.RequestContextListener
+		</listener-class>
+	</listener>
+	
+	<!-- 配置SpringMVC核心Servlet [BEGIN] -->
+	<servlet>
+		<servlet-name>springmvc</servlet-name>
+		<servlet-class>
+			org.springframework.web.servlet.DispatcherServlet
+		</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>springmvc</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+	<!-- 配置SpringMVC核心Servlet [END] -->
+	
+	<!-- 配置编码过滤器 [BEGIN] -->
+	<filter>
+		<filter-name>encodingFilter</filter-name>
+		<filter-class>
+			org.springframework.web.filter.CharacterEncodingFilter
+		</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+	</filter>
+	<!-- 配置编码过滤器 [END] -->
+	
+	<!-- 配置安全认证Shiro过滤器 [BEGIN] -->
+	<filter>
+		<filter-name>shiroFilter</filter-name>
+		<filter-class>
+			org.springframework.web.filter.DelegatingFilterProxy
+		</filter-class>
+		<init-param>
+			<!-- 使用Spring所代理的过滤器自己的生命周期 -->
+			<param-name>targetFilterLifecycle</param-name>
+			<param-value>true</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>shiroFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	<!-- 配置安全认证Shiro过滤器 [END] -->
+</web-app>
